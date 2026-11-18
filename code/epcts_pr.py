@@ -182,7 +182,38 @@ summary = dict(per_prompt=summ, pooled=dict(
     auc_PR=round(roc_auc_score(df.true, df.PR), 3), auc_noalpha=round(roc_auc_score(df.true, df.PR_no_alpha), 3),
     pct_short_offtopic_gt_long_ontopic=None if cross is None else round(100 * cross, 1),
     seg_parse_failures=fails, seg_repaired=repaired, llm=args.llm, emb=args.emb, per_prompt=args.per_prompt))
+# ---------- per-essay ranking metrics (alpha cannot change these; see Eq. prdiff) ----------
+def per_essay(df, col):
+    top1, rr, pair, auc_e = [], [], [], []
+    for eid, g in df.groupby('essay_id'):
+        t = g[g.true == 1][col]
+        if len(t) != 1:
+            continue
+        tv = t.iloc[0]; w = g[g.true == 0][col].values
+        rank = 1 + int((w > tv).sum())
+        top1.append(rank == 1); rr.append(1.0 / rank)
+        pair.append(float((w < tv).mean())); auc_e.append(float((w < tv).mean() + 0.5 * (w == tv).mean()))
+    return dict(top1=round(float(np.mean(top1)), 4), mrr=round(float(np.mean(rr)), 4),
+                pairwise=round(float(np.mean(pair)), 4), per_essay_auc=round(float(np.mean(auc_e)), 4))
+cols = ['PR', 'PR_no_alpha', 'sim_e', 'mean_sim']
+rank_tab = {'pooled': {c: per_essay(df, c) for c in cols}}
+for s_ in sorted(df.essay_set.unique()):
+    rank_tab[int(s_)] = {c: per_essay(df[df.essay_set == s_], c) for c in cols}
+for c in cols:
+    rank_tab['pooled'][c]['pooled_auc'] = round(float(roc_auc_score(df.true, df[c])), 4)
+summary['per_essay_ranking'] = rank_tab
+print('\nPer-essay ranking (pooled):')
+for c in cols:
+    print(c.ljust(12), rank_tab['pooled'][c])
+same = all(rank_tab[k]['PR'][m] == rank_tab[k]['PR_no_alpha'][m] for k in rank_tab for m in ['top1', 'mrr', 'pairwise', 'per_essay_auc'])
+print('per-essay metrics identical with and without alpha:', same)
+summary['per_essay_identical_with_without_alpha'] = bool(same)
+os.makedirs('/kaggle/working/epcts_results', exist_ok=True) if os.path.exists('/kaggle') else None
 json.dump(summary, open(args.out + '_summary.json', 'w'), indent=1)
+if os.path.exists('/kaggle/working'):
+    import shutil
+    for f in [args.out + '.csv', args.out + '_segments.csv', args.out + '_summary.json']:
+        shutil.copy(f, '/kaggle/working/epcts_results/')
 print(pd.DataFrame(summ).T.to_string())
 print(json.dumps(summary['pooled']))
 log('done')
