@@ -109,3 +109,16 @@ Near-miss 7 = impatience (very close wording), 8 = sadness. Prompt 7: gate partl
 | median g | – | .957 | .958 (mean) |
 
 Reading: halving the mismatch share recovers almost all of the accuracy cost on prompt 1 and makes the wrong-prompt response stronger, not weaker. One prompt, one seed: use ratio 0.25 (and check prompt 2) in the 5-seed runs.
+
+### Run 13 (Kaggle Version 7, 2026-11-19, 43 min): mismatch ratio 0.25 on prompt 2, seed 12
+
+| Prompt 2 | Baseline ProTACT | Gate v4, ratio 0.5 | Gate v4, ratio 0.25 |
+|---|---|---|---|
+| Average QWK | .560 | .546 | .556 |
+| Content QWK | .599 | .476 | .489 |
+| Content signed error | -0.13 | -0.52 | -0.48 |
+| Wrong prompt: Content change / % lower / QWK | 0 / 0 / – | -0.64 / 61 / .219 | -0.62 / 59 / .245 |
+| Splice 25/50/75/100% | – | -0.03 / -0.09 / -0.20 / -0.66 | -0.02 / -0.07 / -0.17 / -0.63 |
+| mean g | – | – | .957 |
+
+Reading: on prompt 2 the lower mismatch share helps only slightly. The mismatch share explains much of the cost on prompt 1 but not on prompt 2. Ratio 0.25 was not worse on either prompt, so it is a reasonable default for the 5-seed runs, but the evidence is modest (two prompts, one seed).
