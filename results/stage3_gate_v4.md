@@ -61,10 +61,51 @@ Near-miss prompts: 1 = television instead of computers, 2 = library opening hour
 | 5 | .964 | .810 | .00 | .13 | -0.01 | -0.73 |
 | 6 | .981 | .902 | -.12 | .09 | -0.06 | -0.38 |
 
-Baseline ProTACT signed errors not yet computed (weights saved in Version 3 output), so the bias cannot yet be attributed to the gate.
+Baseline comparison (computed 2026-11-19 from saved outputs, no new run): gold mean = gate mean prediction (gatev4_p*_s12.json, mean_true_prompt) - gate signed error (stage4 base); baseline mean prediction from Version 3 pilot_p*_s12.json.
+
+| Prompt | Trait | Gold mean | Baseline signed error | Gate signed error | Gate - baseline mean prediction |
+|---|---|---|---|---|---|
+| 1 | Content | 3.847 | +0.106 | -0.657 | -0.763 |
+| 2 | Content | 3.217 | -0.134 | -0.519 | -0.385 |
+| 3 | Content | 1.435 | -0.002 | -0.057 | -0.055 |
+| 3 | PA | 1.479 | -0.113 | -0.406 | -0.293 |
+| 4 | Content | 1.108 | +0.171 | +0.106 | -0.065 |
+| 4 | PA | 1.100 | +0.232 | +0.064 | -0.168 |
+| 5 | Content | 1.885 | +0.234 | -0.006 | -0.240 |
+| 5 | PA | 2.034 | -0.349 | -0.730 | -0.381 |
+| 6 | Content | 1.846 | +0.133 | -0.055 | -0.188 |
+| 6 | PA | 1.749 | +0.440 | -0.378 | -0.818 |
+
+Reading: the gated model scores on-topic essays lower than the baseline on every prompt/trait (-0.06 to -0.82). The under-scoring on prompts 1-2 Content and PA 3/5 comes from the gate model, not ProTACT. Likely cause: mismatch training (half of added copies carry lowest labels). Next lever: mismatch ratio / loss weight on mismatched copies.
 
 ## Reading
 - Unseen prompts: the gate responds as strongly as to seen wrong prompts, so it is not memorising the 7 training prompts.
 - Paraphrases: small changes (mostly <= 0.1 points, <= 9% of essays), except prompt 1 (up to -0.21, 21%).
 - Near-miss: for source prompts 3-6, a different question about the same passage barely changes Content (<= 12%): the gate detects the topic/passage, not the question asked.
 - Splice: monotone in all prompts, but convex: small until most of the essay is off-topic.
+
+## Run 12 (Kaggle Version 6, 2026-11-19, 2h17m): Stage 4 for prompts 7-8, and mismatch ratio 0.25 on prompt 1
+
+Stage 4 ran without error for prompts 7 and 8 this time (the earlier missing output was not reproduced).
+
+| Prompt | Paraphrases (3) | Near-miss | Unseen (6), range | Splice 25/50/75/100% | median g | Content signed error, gate (baseline) |
+|---|---|---|---|---|---|---|
+| 7 | -0.12, -0.04, -0.14 | -0.12 (19) | -0.40 to -0.72 | -0.07 / -0.19 / -0.36 / -0.60 | .702 (5th pct .449) | -1.86 (-1.16) |
+| 8 | -0.15, +0.01, -0.19 | -1.12 (80) | -1.12 to -2.44 | -0.08 / -0.28 / -0.64 / -1.91 | .884 (5th pct .588) | -0.42 (+1.54) |
+
+Near-miss 7 = impatience (very close wording), 8 = sadness. Prompt 7: gate partly closes on on-topic narrative essays (rho(g, gold Content) = -0.28), which explains its Content QWK drop (.379 -> .143).
+
+### Mismatch ratio 0.25 vs 0.5, prompt 1, seed 12
+
+| | Baseline ProTACT | Gate v4, ratio 0.5 | Gate v4, ratio 0.25 |
+|---|---|---|---|
+| Average QWK | .658 | .630 | .654 |
+| Content QWK | .661 | .468 | .634 |
+| Content signed error | +0.11 | -0.66 | -0.11 |
+| Wrong prompt: Content change / % lower / QWK | 0 / 0 / – | -0.88 / 82 / .155 | -1.05 / 89 / .250 |
+| Unseen prompts, Content change | – | -0.87 to -1.09 | -1.02 to -1.38 |
+| Near-miss (television) | – | -0.86 (81) | -1.02 (89) |
+| Paraphrases | – | -0.21, -0.16, -0.04 | -0.24, -0.18, -0.04 |
+| median g | – | .957 | .958 (mean) |
+
+Reading: halving the mismatch share recovers almost all of the accuracy cost on prompt 1 and makes the wrong-prompt response stronger, not weaker. One prompt, one seed: use ratio 0.25 (and check prompt 2) in the 5-seed runs.
