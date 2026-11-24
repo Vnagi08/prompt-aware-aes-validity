@@ -566,10 +566,12 @@ for SEED in ['42', '32', '52']:
             shutil.copy('logs/boot_%s_p%s_s%s.log' % (kind, p, SEED), OUT)
 
 # ---- bootstrap ----
-from sklearn.metrics import cohen_kappa_score
+# QWK: ProTACT's own kappa (every integer between the lowest and highest score present), as for all QWKs in the paper.
+# The per-seed bootstrap below is a quick check; the reported intervals come from 22_boot_from_preds.py, which pools the seeds.
+sys.path.insert(0, '/kaggle/working/ProTACT')
+from metrics.metrics import kappa
 def qwk(a, b):
-    a = np.rint(a).astype(int); b = np.rint(b).astype(int)
-    return cohen_kappa_score(a, b, weights='quadratic') if len(set(a) | set(b)) > 1 else 0.0
+    return kappa(a, b, 'quadratic')
 def avgq(d, idx):
     return np.mean([qwk(np.array(d['true'][t])[idx], np.array(d['pred'][t])[idx]) for t in d['pred']])
 def tq(d, t, idx):
