@@ -518,6 +518,7 @@ def st(tag='gate'):
 
 
 
+import shutil, json
 # ---- 21: essay-level paired bootstrap of the gate vs the ungated baseline (CPU, no training) ----
 EVAL_FN = """
 
@@ -533,7 +534,7 @@ def _eval_only(L):
              'pred': {k: [float(v) for v in pred[k]] for k in pred}}, open(os.environ['PRED_OUT'], 'w'))
     print('saved predictions', os.environ['PRED_OUT'], {k: round(float(kappa(true_org[k], pred[k], 'quadratic')), 3) for k in pred})
 """
-HOOK = "    if os.environ.get('LOAD_W'):\\n        _eval_only(locals())\\n        import sys as _s; _s.exit(0)\\n"
+HOOK = "    if os.environ.get('LOAD_W'):\n        _eval_only(locals())\n        import sys as _s; _s.exit(0)\n"
 for fn in ['train_pilot.py', 'train_fix.py']:
     t = open(fn).read()
     if '_eval_only' not in t:
