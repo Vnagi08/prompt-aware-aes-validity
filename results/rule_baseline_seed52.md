@@ -32,4 +32,4 @@ p1: paraphrases -0.71 / -1.13 / -0.03, unseen -2.90, splice 25/50/75/100% -0.01 
 | learned gate | .647 | .549 | .554 | .527 | .614 | .545 | .326 | .442 | .526 |
 | hard rule | .639 | .560 | .560 | .542 | .641 | .564 | .263 | .388 | .520 |
 | ramp rule | .642 | .560 | .551 | .560 | .645 | .573 | .270 | .397 | .525 |
-Content % lower: gate 89 58 51 44 63 79 56 92 (67); hard rule 98 89 86 88 87 99 29 53 (79). SD across seeds of every rule entry <= 0.007 QWK / 1.2 points.
+Content % lower: gate 89 58 51 44 63 79 56 92 (67); hard rule 98 89 86 88 87 99 29 53 (79). Sample SD across seeds (ddof=1, as in Table V) of the rule entries: at most 0.008 in the QWK rows (prompt 7) and 1.4 points in the Content % lower row (prompt 4).
